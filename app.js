@@ -3,9 +3,11 @@ const statusText = document.querySelector('#status');
 const template = document.querySelector('#fixtureTemplate');
 const refreshBtn = document.querySelector('#refreshBtn');
 
-// West Ham team ID
-const API_URL =
-  "https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=133604&s=2025-2026";
+const LAST_URL =
+  "https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=133604";
+
+const NEXT_URL =
+  "https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133604";
 
 const renderFixtures = (events) => {
   fixturesContainer.innerHTML = "";
@@ -24,7 +26,7 @@ const renderFixtures = (events) => {
     const date = new Date(event.dateEvent);
     timeEl.textContent = `Date: ${date.toLocaleDateString()}`;
 
-    if (event.intHomeScore !== null) {
+    if (event.intHomeScore !== null && event.intHomeScore !== undefined) {
       scoreEl.textContent =
         `Final score: ${event.intHomeScore}-${event.intAwayScore}`;
     } else {
@@ -36,30 +38,32 @@ const renderFixtures = (events) => {
 };
 
 const loadFixtures = async () => {
-  statusText.textContent = "Loading West Ham season fixtures...";
+  statusText.textContent = "Loading West Ham fixtures...";
   refreshBtn.disabled = true;
 
   try {
-    const response = await fetch(API_URL);
-    const data = await response.json();
+    const [lastRes, nextRes] = await Promise.all([
+      fetch(LAST_URL),
+      fetch(NEXT_URL)
+    ]);
 
-    if (!data.events) {
-      statusText.textContent = "No season data found.";
+    const lastData = await lastRes.json();
+    const nextData = await nextRes.json();
+
+    const lastMatches = lastData.events || [];
+    const nextMatches = nextData.events || [];
+
+    const combined = [...nextMatches, ...lastMatches].slice(0, 10);
+
+    if (!combined.length) {
+      statusText.textContent = "No fixtures found.";
       return;
     }
 
-    // Filter only West Ham matches (extra safety)
-    const westHamMatches = data.events
-      .filter(event =>
-        event.strHomeTeam === "West Ham United" ||
-        event.strAwayTeam === "West Ham United"
-      )
-      .slice(0, 10);
-
     statusText.textContent =
-      `Showing ${westHamMatches.length} West Ham fixtures`;
+      `Showing ${combined.length} West Ham fixtures`;
 
-    renderFixtures(westHamMatches);
+    renderFixtures(combined);
 
   } catch (err) {
     statusText.textContent = "Failed to load matches.";
