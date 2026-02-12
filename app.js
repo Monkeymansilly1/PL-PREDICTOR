@@ -3,41 +3,14 @@ const statusText = document.querySelector('#status');
 const template = document.querySelector('#fixtureTemplate');
 const refreshBtn = document.querySelector('#refreshBtn');
 
-const API_KEY = "4d462e0edd4a473b8012c9b246108674";
-
+// West Ham United team ID
 const API_URL =
-  "https://api.football-data.org/v4/competitions/PL/matches?status=FINISHED";
+  "https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133604";
 
-const seededNumber = (text) => {
-  let hash = 0;
-  for (const char of text) {
-    hash = (hash << 5) - hash + char.charCodeAt(0);
-    hash |= 0;
-  }
-  return Math.abs(hash % 1000) / 1000;
-};
-
-const predictMatch = (home, away) => {
-  const homePower = seededNumber(home);
-  const awayPower = seededNumber(away);
-
-  const delta = homePower - awayPower;
-
-  const homeWin = 1 / (1 + Math.exp(-3 * delta));
-  const draw = 0.2;
-  const awayWin = 1 - homeWin - draw;
-
-  return {
-    home: Math.round(homeWin * 100),
-    draw: Math.round(draw * 100),
-    away: Math.round(awayWin * 100),
-  };
-};
-
-const renderFixtures = (matches) => {
+const renderFixtures = (events) => {
   fixturesContainer.innerHTML = "";
 
-  matches.forEach(match => {
+  events.forEach(event => {
     const fragment = template.content.cloneNode(true);
 
     const nameEl = fragment.querySelector(".fixture__name");
@@ -46,54 +19,45 @@ const renderFixtures = (matches) => {
     const scoreEl = fragment.querySelector(".fixture__score");
     const predictionEl = fragment.querySelector(".fixture__prediction");
 
-    const home = match.homeTeam.name;
-    const away = match.awayTeam.name;
+    const home = event.strHomeTeam;
+    const away = event.strAwayTeam;
 
     nameEl.textContent = `${home} vs ${away}`;
-    leagueEl.textContent = `Competition: Premier League`;
+    leagueEl.textContent = `Competition: ${event.strLeague}`;
 
-    const date = new Date(match.utcDate);
-    timeEl.textContent = `Played: ${date.toLocaleDateString()}`;
+    const date = new Date(`${event.dateEvent}T${event.strTime || "15:00:00"}`);
+    timeEl.textContent = `Kickoff: ${date.toLocaleString()}`;
 
-    scoreEl.textContent =
-      `Final score: ${match.score.fullTime.home}-${match.score.fullTime.away}`;
+    scoreEl.textContent = "Upcoming match";
 
-    const prediction = predictMatch(home, away);
-    predictionEl.textContent =
-      `Prediction → Home ${prediction.home}% · Draw ${prediction.draw}% · Away ${prediction.away}%`;
+    predictionEl.textContent = "";
 
     fixturesContainer.appendChild(fragment);
   });
 };
 
 const loadFixtures = async () => {
-  statusText.textContent = "Loading Premier League matches...";
+  statusText.textContent = "Loading West Ham fixtures...";
   refreshBtn.disabled = true;
 
   try {
-    const response = await fetch(API_URL, {
-      headers: {
-        "X-Auth-Token": API_KEY,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("API request failed");
-    }
-
+    const response = await fetch(API_URL);
     const data = await response.json();
 
-    const matches = data.matches
-      .slice(-10)
-      .reverse();
+    const events = (data.events || []).slice(0, 10);
+
+    if (!events.length) {
+      statusText.textContent = "No upcoming fixtures found.";
+      return;
+    }
 
     statusText.textContent =
-      `Showing ${matches.length} latest Premier League matches`;
+      `Showing ${events.length} upcoming West Ham fixtures`;
 
-    renderFixtures(matches);
+    renderFixtures(events);
 
   } catch (err) {
-    statusText.textContent = "Failed to load matches.";
+    statusText.textContent = "Failed to load fixtures.";
     console.error(err);
   }
 
