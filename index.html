@@ -3,27 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Football Match Viewer</title>
+  <title>West Ham Fixtures</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="app">
     <header class="app__header">
-      <h1>Football Match Viewer</h1>
-      <p>Latest completed matches from all competitions.</p>
+      <h1>West Ham United</h1>
+      <p>Upcoming fixtures in all competitions.</p>
     </header>
 
     <section class="card controls">
-      <button id="refreshBtn">Refresh Matches</button>
+      <button id="refreshBtn">Refresh Fixtures</button>
     </section>
 
     <section class="card">
-      <h2>Recent Matches</h2>
-      <p id="status">Loading...</p>
+      <h2>Upcoming Matches</h2>
+      <p id="status">Loading West Ham fixtures...</p>
       <div id="fixtures" class="fixtures"></div>
     </section>
   </main>
 
+  <!-- Template for each match -->
   <template id="fixtureTemplate">
     <article class="fixture">
       <div>
