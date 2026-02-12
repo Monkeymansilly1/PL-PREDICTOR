@@ -3,35 +3,33 @@ const statusText = document.querySelector('#status');
 const template = document.querySelector('#fixtureTemplate');
 const refreshBtn = document.querySelector('#refreshBtn');
 
-const LAST_URL =
-  "https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=133604";
-
-const NEXT_URL =
-  "https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133604";
+const LAST_URL = "https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=133604";
+const NEXT_URL = "https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133604";
 
 const renderFixtures = (events) => {
   fixturesContainer.innerHTML = "";
 
-  events.forEach(event => {
+  events.forEach((event) => {
     const fragment = template.content.cloneNode(true);
 
     const nameEl = fragment.querySelector(".fixture__name");
     const leagueEl = fragment.querySelector(".fixture__league");
     const timeEl = fragment.querySelector(".fixture__time");
     const scoreEl = fragment.querySelector(".fixture__score");
+    const predictionEl = fragment.querySelector(".fixture__prediction");
 
     nameEl.textContent = `${event.strHomeTeam} vs ${event.strAwayTeam}`;
-    leagueEl.textContent = `Competition: ${event.strLeague}`;
+    leagueEl.textContent = `Competition: ${event.strLeague || "Unknown"}`;
 
     const date = new Date(event.dateEvent);
     timeEl.textContent = `Date: ${date.toLocaleDateString()}`;
 
-    if (event.intHomeScore !== null && event.intHomeScore !== undefined) {
-      scoreEl.textContent =
-        `Final score: ${event.intHomeScore}-${event.intAwayScore}`;
-    } else {
-      scoreEl.textContent = "Upcoming Fixture";
-    }
+    const hasScore = event.intHomeScore !== null && event.intHomeScore !== undefined;
+    scoreEl.textContent = hasScore
+      ? `Final score: ${event.intHomeScore}-${event.intAwayScore}`
+      : "Upcoming fixture";
+
+    if (predictionEl) predictionEl.textContent = "";
 
     fixturesContainer.appendChild(fragment);
   });
@@ -43,8 +41,8 @@ const loadFixtures = async () => {
 
   try {
     const [lastRes, nextRes] = await Promise.all([
-      fetch(LAST_URL),
-      fetch(NEXT_URL)
+      fetch(LAST_URL, { cache: "no-store" }),
+      fetch(NEXT_URL, { cache: "no-store" }),
     ]);
 
     const lastData = await lastRes.json();
@@ -57,20 +55,19 @@ const loadFixtures = async () => {
 
     if (!combined.length) {
       statusText.textContent = "No fixtures found.";
+      fixturesContainer.innerHTML = "";
       return;
     }
 
-    statusText.textContent =
-      `Showing ${combined.length} West Ham fixtures`;
-
+    statusText.textContent = `Showing ${combined.length} West Ham fixtures`;
     renderFixtures(combined);
-
   } catch (err) {
-    statusText.textContent = "Failed to load matches.";
     console.error(err);
+    statusText.textContent = "Failed to load matches.";
+    fixturesContainer.innerHTML = "";
+  } finally {
+    refreshBtn.disabled = false;
   }
-
-  refreshBtn.disabled = false;
 };
 
 refreshBtn.addEventListener("click", loadFixtures);
