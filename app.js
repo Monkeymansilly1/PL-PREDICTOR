@@ -1,19 +1,9 @@
 const fixturesContainer = document.querySelector('#fixtures');
 const statusText = document.querySelector('#status');
 const template = document.querySelector('#fixtureTemplate');
-const refreshButton = document.querySelector('#refreshButton');
-const strengthSlider = document.querySelector('#teamStrength');
-const strengthValue = document.querySelector('#strengthValue');
+const refreshBtn = document.querySelector('#refreshBtn');
 
-const PREM_LEAGUE_ID = '4328';
-const API_URL = `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${PREM_LEAGUE_ID}`;
-
-const normalizeTeamName = (name = '') =>
-  name
-    .toLowerCase()
-    .replace(/\b(fc|afc|city|united|hotspur|wanderers|albion|town)\b/g, '')
-    .replace(/[^a-z]/g, '')
-    .trim();
+const API_URL = "https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=4328";
 
 const seededNumber = (text) => {
   let hash = 0;
@@ -24,96 +14,76 @@ const seededNumber = (text) => {
   return Math.abs(hash % 1000) / 1000;
 };
 
-const calcPrediction = (homeTeam, awayTeam, homeAdvantage) => {
-  const homePower = seededNumber(normalizeTeamName(homeTeam));
-  const awayPower = seededNumber(normalizeTeamName(awayTeam));
-  const delta = homePower - awayPower + Number(homeAdvantage);
+const predictMatch = (home, away) => {
+  const homePower = seededNumber(home);
+  const awayPower = seededNumber(away);
+
+  const delta = homePower - awayPower;
 
   const homeWin = 1 / (1 + Math.exp(-3 * delta));
-  const awayWin = Math.max(0.08, 1 - homeWin - 0.18);
-  const draw = 1 - homeWin - awayWin;
-
-  const homeGoals = Math.max(0, Math.round(1.1 + homeWin * 2 + draw * 0.5));
-  const awayGoals = Math.max(0, Math.round(0.8 + awayWin * 2 + draw * 0.4));
+  const draw = 0.20;
+  const awayWin = 1 - homeWin - draw;
 
   return {
-    homeWin: Math.round(homeWin * 100),
+    home: Math.round(homeWin * 100),
     draw: Math.round(draw * 100),
-    awayWin: Math.round(awayWin * 100),
-    scoreline: `${homeGoals}-${awayGoals}`,
+    away: Math.round(awayWin * 100),
   };
 };
 
 const renderFixtures = (events) => {
-  fixturesContainer.innerHTML = '';
+  fixturesContainer.innerHTML = "";
 
   for (const event of events) {
     const fragment = template.content.cloneNode(true);
-    const nameEl = fragment.querySelector('.fixture__name');
-    const timeEl = fragment.querySelector('.fixture__time');
-    const probabilityEl = fragment.querySelector('.fixture__win-prob');
-    const scoreEl = fragment.querySelector('.fixture__score');
 
-    const homeTeam = event.strHomeTeam;
-    const awayTeam = event.strAwayTeam;
-    const prediction = calcPrediction(homeTeam, awayTeam, strengthSlider.value);
+    const nameEl = fragment.querySelector(".fixture__name");
+    const leagueEl = fragment.querySelector(".fixture__league");
+    const timeEl = fragment.querySelector(".fixture__time");
+    const scoreEl = fragment.querySelector(".fixture__score");
+    const predictionEl = fragment.querySelector(".fixture__prediction");
 
-    nameEl.textContent = `${homeTeam} vs ${awayTeam}`;
-    const kickoffDate = new Date(`${event.dateEvent}T${event.strTime || '15:00:00'}Z`);
-    timeEl.textContent = `Kickoff: ${kickoffDate.toLocaleString([], {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`;
+    const home = event.strHomeTeam;
+    const away = event.strAwayTeam;
 
-    probabilityEl.textContent = `Home win ${prediction.homeWin}% · Draw ${prediction.draw}% · Away win ${prediction.awayWin}%`;
-    scoreEl.textContent = `Predicted score: ${prediction.scoreline}`;
+    nameEl.textContent = `${home} vs ${away}`;
+    leagueEl.textContent = `Competition: ${event.strLeague}`;
+
+    const date = new Date(event.dateEvent);
+    timeEl.textContent = `Played: ${date.toLocaleDateString()}`;
+
+    scoreEl.textContent = `Final score: ${event.intHomeScore}-${event.intAwayScore}`;
+
+    const prediction = predictMatch(home, away);
+    predictionEl.textContent =
+      `Prediction → Home ${prediction.home}% · Draw ${prediction.draw}% · Away ${prediction.away}%`;
 
     fixturesContainer.appendChild(fragment);
   }
 };
 
 const loadFixtures = async () => {
-  statusText.textContent = 'Loading latest fixtures...';
-  refreshButton.disabled = true;
+  statusText.textContent = "Loading latest matches...";
+  refreshBtn.disabled = true;
 
   try {
-    const response = await fetch(API_URL, { cache: 'no-cache' });
-    if (!response.ok) {
-      throw new Error(`Request failed with ${response.status}`);
-    }
+    const response = await fetch(API_URL);
+    const data = await response.json();
 
-    const payload = await response.json();
-    const events = (payload.events || []).slice(0, 10);
+    const events = (data.events || [])
+      .sort((a, b) => new Date(b.dateEvent) - new Date(a.dateEvent))
+      .slice(0, 10);
 
-    if (!events.length) {
-      statusText.textContent = 'No upcoming fixtures found right now.';
-      fixturesContainer.innerHTML = '';
-      return;
-    }
-
-    statusText.textContent = `Showing ${events.length} upcoming fixtures.`;
+    statusText.textContent = `Showing ${events.length} latest matches`;
     renderFixtures(events);
-  } catch (error) {
-    statusText.textContent = 'Unable to load fixtures right now. Please try again.';
-    fixturesContainer.innerHTML = '';
-    console.error(error);
-  } finally {
-    refreshButton.disabled = false;
+
+  } catch (err) {
+    statusText.textContent = "Failed to load matches.";
+    console.error(err);
   }
+
+  refreshBtn.disabled = false;
 };
 
-strengthSlider.addEventListener('input', () => {
-  strengthValue.textContent = Number(strengthSlider.value).toFixed(2);
-  const existingFixtures = [...fixturesContainer.children];
-  if (existingFixtures.length > 0) {
-    loadFixtures();
-  }
-});
-
-refreshButton.addEventListener('click', loadFixtures);
-
-strengthValue.textContent = Number(strengthSlider.value).toFixed(2);
+refreshBtn.addEventListener("click", loadFixtures);
 loadFixtures();
