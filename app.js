@@ -3,8 +3,9 @@ const statusText = document.querySelector('#status');
 const template = document.querySelector('#fixtureTemplate');
 const refreshBtn = document.querySelector('#refreshBtn');
 
-const LAST_URL = "https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=133604";
-const NEXT_URL = "https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133604";
+// ✅ West Ham United = 133636
+const LAST_URL = "https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=133636";
+const NEXT_URL = "https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133636";
 
 const renderFixtures = (events) => {
   fixturesContainer.innerHTML = "";
