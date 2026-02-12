@@ -3,9 +3,9 @@ const statusText = document.querySelector('#status');
 const template = document.querySelector('#fixtureTemplate');
 const refreshBtn = document.querySelector('#refreshBtn');
 
-// ✅ West Ham United - LAST matches (always returns data)
+// West Ham United team ID
 const API_URL =
-  "https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=133604";
+  "https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133604";
 
 const renderFixtures = (events) => {
   fixturesContainer.innerHTML = "";
@@ -22,12 +22,10 @@ const renderFixtures = (events) => {
     nameEl.textContent = `${event.strHomeTeam} vs ${event.strAwayTeam}`;
     leagueEl.textContent = `Competition: ${event.strLeague}`;
 
-    const date = new Date(event.dateEvent);
-    timeEl.textContent = `Played: ${date.toLocaleDateString()}`;
+    const date = new Date(`${event.dateEvent}T${event.strTime || "15:00:00"}`);
+    timeEl.textContent = `Kickoff: ${date.toLocaleString()}`;
 
-    scoreEl.textContent =
-      `Final score: ${event.intHomeScore}-${event.intAwayScore}`;
-
+    scoreEl.textContent = "Upcoming Fixture";
     predictionEl.textContent = "";
 
     fixturesContainer.appendChild(fragment);
@@ -35,7 +33,7 @@ const renderFixtures = (events) => {
 };
 
 const loadFixtures = async () => {
-  statusText.textContent = "Loading recent West Ham matches...";
+  statusText.textContent = "Loading West Ham fixtures...";
   refreshBtn.disabled = true;
 
   try {
@@ -43,16 +41,20 @@ const loadFixtures = async () => {
     const data = await response.json();
 
     if (!data.events) {
-      statusText.textContent = "No recent matches found.";
+      statusText.textContent = "No upcoming fixtures found.";
       return;
     }
 
-    const events = data.events.slice(0, 10);
+    // 🔥 Extra safety filter — must contain West Ham
+    const westHamGames = data.events.filter(event =>
+      event.strHomeTeam === "West Ham United" ||
+      event.strAwayTeam === "West Ham United"
+    );
 
     statusText.textContent =
-      `Showing ${events.length} recent West Ham matches`;
+      `Showing ${westHamGames.length} upcoming West Ham fixtures`;
 
-    renderFixtures(events);
+    renderFixtures(westHamGames);
 
   } catch (err) {
     statusText.textContent = "Failed to load matches.";
