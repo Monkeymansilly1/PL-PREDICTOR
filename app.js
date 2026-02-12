@@ -3,7 +3,10 @@ const statusText = document.querySelector('#status');
 const template = document.querySelector('#fixtureTemplate');
 const refreshBtn = document.querySelector('#refreshBtn');
 
-const API_URL = "https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=4328";
+const API_KEY = "4d462e0edd4a473b8012c9b246108674";
+
+const API_URL =
+  "https://api.football-data.org/v4/competitions/PL/matches?status=FINISHED";
 
 const seededNumber = (text) => {
   let hash = 0;
@@ -21,7 +24,7 @@ const predictMatch = (home, away) => {
   const delta = homePower - awayPower;
 
   const homeWin = 1 / (1 + Math.exp(-3 * delta));
-  const draw = 0.20;
+  const draw = 0.2;
   const awayWin = 1 - homeWin - draw;
 
   return {
@@ -31,10 +34,10 @@ const predictMatch = (home, away) => {
   };
 };
 
-const renderFixtures = (events) => {
+const renderFixtures = (matches) => {
   fixturesContainer.innerHTML = "";
 
-  for (const event of events) {
+  matches.forEach(match => {
     const fragment = template.content.cloneNode(true);
 
     const nameEl = fragment.querySelector(".fixture__name");
@@ -43,39 +46,51 @@ const renderFixtures = (events) => {
     const scoreEl = fragment.querySelector(".fixture__score");
     const predictionEl = fragment.querySelector(".fixture__prediction");
 
-    const home = event.strHomeTeam;
-    const away = event.strAwayTeam;
+    const home = match.homeTeam.name;
+    const away = match.awayTeam.name;
 
     nameEl.textContent = `${home} vs ${away}`;
-    leagueEl.textContent = `Competition: ${event.strLeague}`;
+    leagueEl.textContent = `Competition: Premier League`;
 
-    const date = new Date(event.dateEvent);
+    const date = new Date(match.utcDate);
     timeEl.textContent = `Played: ${date.toLocaleDateString()}`;
 
-    scoreEl.textContent = `Final score: ${event.intHomeScore}-${event.intAwayScore}`;
+    scoreEl.textContent =
+      `Final score: ${match.score.fullTime.home}-${match.score.fullTime.away}`;
 
     const prediction = predictMatch(home, away);
     predictionEl.textContent =
       `Prediction → Home ${prediction.home}% · Draw ${prediction.draw}% · Away ${prediction.away}%`;
 
     fixturesContainer.appendChild(fragment);
-  }
+  });
 };
 
 const loadFixtures = async () => {
-  statusText.textContent = "Loading latest matches...";
+  statusText.textContent = "Loading Premier League matches...";
   refreshBtn.disabled = true;
 
   try {
-    const response = await fetch(API_URL);
+    const response = await fetch(API_URL, {
+      headers: {
+        "X-Auth-Token": API_KEY,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("API request failed");
+    }
+
     const data = await response.json();
 
-    const events = (data.events || [])
-      .sort((a, b) => new Date(b.dateEvent) - new Date(a.dateEvent))
-      .slice(0, 10);
+    const matches = data.matches
+      .slice(-10)
+      .reverse();
 
-    statusText.textContent = `Showing ${events.length} latest matches`;
-    renderFixtures(events);
+    statusText.textContent =
+      `Showing ${matches.length} latest Premier League matches`;
+
+    renderFixtures(matches);
 
   } catch (err) {
     statusText.textContent = "Failed to load matches.";
