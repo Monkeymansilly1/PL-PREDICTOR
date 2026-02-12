@@ -3,9 +3,9 @@ const statusText = document.querySelector('#status');
 const template = document.querySelector('#fixtureTemplate');
 const refreshBtn = document.querySelector('#refreshBtn');
 
-// West Ham United team ID
+// ✅ West Ham United - LAST matches (always returns data)
 const API_URL =
-  "https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133604";
+  "https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=133604";
 
 const renderFixtures = (events) => {
   fixturesContainer.innerHTML = "";
@@ -19,16 +19,14 @@ const renderFixtures = (events) => {
     const scoreEl = fragment.querySelector(".fixture__score");
     const predictionEl = fragment.querySelector(".fixture__prediction");
 
-    const home = event.strHomeTeam;
-    const away = event.strAwayTeam;
-
-    nameEl.textContent = `${home} vs ${away}`;
+    nameEl.textContent = `${event.strHomeTeam} vs ${event.strAwayTeam}`;
     leagueEl.textContent = `Competition: ${event.strLeague}`;
 
-    const date = new Date(`${event.dateEvent}T${event.strTime || "15:00:00"}`);
-    timeEl.textContent = `Kickoff: ${date.toLocaleString()}`;
+    const date = new Date(event.dateEvent);
+    timeEl.textContent = `Played: ${date.toLocaleDateString()}`;
 
-    scoreEl.textContent = "Upcoming match";
+    scoreEl.textContent =
+      `Final score: ${event.intHomeScore}-${event.intAwayScore}`;
 
     predictionEl.textContent = "";
 
@@ -37,27 +35,27 @@ const renderFixtures = (events) => {
 };
 
 const loadFixtures = async () => {
-  statusText.textContent = "Loading West Ham fixtures...";
+  statusText.textContent = "Loading recent West Ham matches...";
   refreshBtn.disabled = true;
 
   try {
     const response = await fetch(API_URL);
     const data = await response.json();
 
-    const events = (data.events || []).slice(0, 10);
-
-    if (!events.length) {
-      statusText.textContent = "No upcoming fixtures found.";
+    if (!data.events) {
+      statusText.textContent = "No recent matches found.";
       return;
     }
 
+    const events = data.events.slice(0, 10);
+
     statusText.textContent =
-      `Showing ${events.length} upcoming West Ham fixtures`;
+      `Showing ${events.length} recent West Ham matches`;
 
     renderFixtures(events);
 
   } catch (err) {
-    statusText.textContent = "Failed to load fixtures.";
+    statusText.textContent = "Failed to load matches.";
     console.error(err);
   }
 
