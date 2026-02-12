@@ -3,9 +3,9 @@ const statusText = document.querySelector('#status');
 const template = document.querySelector('#fixtureTemplate');
 const refreshBtn = document.querySelector('#refreshBtn');
 
-// West Ham United team ID
+// West Ham team ID
 const API_URL =
-  "https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133604";
+  "https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=133604&s=2025-2026";
 
 const renderFixtures = (events) => {
   fixturesContainer.innerHTML = "";
@@ -17,23 +17,26 @@ const renderFixtures = (events) => {
     const leagueEl = fragment.querySelector(".fixture__league");
     const timeEl = fragment.querySelector(".fixture__time");
     const scoreEl = fragment.querySelector(".fixture__score");
-    const predictionEl = fragment.querySelector(".fixture__prediction");
 
     nameEl.textContent = `${event.strHomeTeam} vs ${event.strAwayTeam}`;
     leagueEl.textContent = `Competition: ${event.strLeague}`;
 
-    const date = new Date(`${event.dateEvent}T${event.strTime || "15:00:00"}`);
-    timeEl.textContent = `Kickoff: ${date.toLocaleString()}`;
+    const date = new Date(event.dateEvent);
+    timeEl.textContent = `Date: ${date.toLocaleDateString()}`;
 
-    scoreEl.textContent = "Upcoming Fixture";
-    predictionEl.textContent = "";
+    if (event.intHomeScore !== null) {
+      scoreEl.textContent =
+        `Final score: ${event.intHomeScore}-${event.intAwayScore}`;
+    } else {
+      scoreEl.textContent = "Upcoming Fixture";
+    }
 
     fixturesContainer.appendChild(fragment);
   });
 };
 
 const loadFixtures = async () => {
-  statusText.textContent = "Loading West Ham fixtures...";
+  statusText.textContent = "Loading West Ham season fixtures...";
   refreshBtn.disabled = true;
 
   try {
@@ -41,20 +44,22 @@ const loadFixtures = async () => {
     const data = await response.json();
 
     if (!data.events) {
-      statusText.textContent = "No upcoming fixtures found.";
+      statusText.textContent = "No season data found.";
       return;
     }
 
-    // 🔥 Extra safety filter — must contain West Ham
-    const westHamGames = data.events.filter(event =>
-      event.strHomeTeam === "West Ham United" ||
-      event.strAwayTeam === "West Ham United"
-    );
+    // Filter only West Ham matches (extra safety)
+    const westHamMatches = data.events
+      .filter(event =>
+        event.strHomeTeam === "West Ham United" ||
+        event.strAwayTeam === "West Ham United"
+      )
+      .slice(0, 10);
 
     statusText.textContent =
-      `Showing ${westHamGames.length} upcoming West Ham fixtures`;
+      `Showing ${westHamMatches.length} West Ham fixtures`;
 
-    renderFixtures(westHamGames);
+    renderFixtures(westHamMatches);
 
   } catch (err) {
     statusText.textContent = "Failed to load matches.";
