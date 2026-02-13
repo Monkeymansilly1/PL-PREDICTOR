@@ -1,34 +1,34 @@
-const fixturesContainer = document.querySelector('#fixtures');
-const statusText = document.querySelector('#status');
-const template = document.querySelector('#fixtureTemplate');
-const refreshBtn = document.querySelector('#refreshBtn');
+const fixturesContainer = document.querySelector("#fixtures");
+const statusText = document.querySelector("#status");
+const template = document.querySelector("#fixtureTemplate");
+const refreshBtn = document.querySelector("#refreshBtn");
 
-console.log("WEST HAM FILTER VERSION LOADED");
+console.log("FOOTBALL DATA VERSION LOADED");
 
-const LEAGUE_URL =
-  "https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=4328";
+// Your API key
+const API_KEY = "4d462e0edd4a473b8012c9b246108674";
 
-const norm = (s = "") => s.toLowerCase();
+// Premier League competition code
+const URL =
+  "https://corsproxy.io/?https://api.football-data.org/v4/competitions/PL/matches?status=SCHEDULED";
 
-const renderFixtures = (events) => {
+const renderFixtures = (matches) => {
   fixturesContainer.innerHTML = "";
 
-  events.forEach(event => {
+  matches.forEach(match => {
     const fragment = template.content.cloneNode(true);
 
     fragment.querySelector(".fixture__name").textContent =
-      `${event.strHomeTeam} vs ${event.strAwayTeam}`;
+      `${match.homeTeam.name} vs ${match.awayTeam.name}`;
 
     fragment.querySelector(".fixture__league").textContent =
-      `Competition: ${event.strLeague}`;
+      `Premier League`;
 
     fragment.querySelector(".fixture__time").textContent =
-      `Date: ${new Date(event.dateEvent).toLocaleDateString()}`;
+      `Date: ${new Date(match.utcDate).toLocaleDateString()}`;
 
     fragment.querySelector(".fixture__score").textContent =
-      event.intHomeScore != null
-        ? `Final score: ${event.intHomeScore}-${event.intAwayScore}`
-        : "Upcoming fixture";
+      "Upcoming fixture";
 
     fixturesContainer.appendChild(fragment);
   });
@@ -39,19 +39,21 @@ const loadFixtures = async () => {
   refreshBtn.disabled = true;
 
   try {
-    const res = await fetch(LEAGUE_URL, { cache: "no-store" });
+    const res = await fetch(URL, {
+      headers: {
+        "X-Auth-Token": API_KEY
+      }
+    });
+
     const data = await res.json();
 
-    const allEvents = data.events || [];
-
-    const westHamMatches = allEvents.filter(event =>
-      norm(event.strHomeTeam).includes("west ham") ||
-      norm(event.strAwayTeam).includes("west ham")
+    const westHamMatches = data.matches.filter(match =>
+      match.homeTeam.name.includes("West Ham") ||
+      match.awayTeam.name.includes("West Ham")
     );
 
     if (!westHamMatches.length) {
-      statusText.textContent =
-        "West Ham not in next 10 PL fixtures returned by API.";
+      statusText.textContent = "No West Ham fixtures found.";
       fixturesContainer.innerHTML = "";
       return;
     }
