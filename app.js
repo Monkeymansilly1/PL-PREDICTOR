@@ -53,7 +53,8 @@ const loadFixtures = async () => {
   }
 };
 
-/* Premier League Table from TheSportsDB */
+/* League Table (TheSportsDB – free) */
+
 const loadLeagueTable = async () => {
   try {
     const res = await fetch(
@@ -69,6 +70,8 @@ const loadLeagueTable = async () => {
 
     const sorted = data.table.sort((a, b) => a.intRank - b.intRank);
 
+    const totalTeams = sorted.length;
+
     tableContainer.innerHTML = `
       <table class="league-table">
         <thead>
@@ -79,13 +82,26 @@ const loadLeagueTable = async () => {
           </tr>
         </thead>
         <tbody>
-          ${sorted.map(team => `
-            <tr class="${team.strTeam.includes("West Ham") ? "highlight" : ""}">
-              <td>${team.intRank}</td>
-              <td style="text-align:left">${team.strTeam}</td>
-              <td>${team.intPoints}</td>
-            </tr>
-          `).join("")}
+          ${sorted.map(team => {
+            const pos = parseInt(team.intRank);
+            let className = "";
+
+            if (pos === 1) className = "pos-1";
+            else if (pos >= 2 && pos <= 4) className = "pos-2";
+            else if (pos === 5 || pos === 6) className = "pos-5";
+            else if (pos === 7) className = "pos-7";
+            else if (pos >= totalTeams - 2) className = "relegation";
+
+            const isWestHam = team.strTeam.includes("West Ham");
+
+            return `
+              <tr class="${className} ${isWestHam ? "highlight" : ""}">
+                <td>${team.intRank}</td>
+                <td style="text-align:left">${team.strTeam}</td>
+                <td>${team.intPoints}</td>
+              </tr>
+            `;
+          }).join("")}
         </tbody>
       </table>
     `;
