@@ -4,13 +4,18 @@ const template = document.querySelector("#fixtureTemplate");
 const refreshBtn = document.querySelector("#refreshBtn");
 const tableContainer = document.querySelector("#tableContainer");
 
-const API_KEY = "4d462e0edd4a473b8012c9b246108674";
+const API_KEY = "YOUR_API_KEY_HERE"; // Replace with regenerated key
 
-// Competitions allowed on free plan
+// Free-tier competitions
 const competitions = ["PL", "FAC"];
 
 const renderFixtures = (matches) => {
   fixturesContainer.innerHTML = "";
+
+  if (!matches.length) {
+    statusText.textContent = "No upcoming matches found.";
+    return;
+  }
 
   matches.forEach(match => {
     const fragment = template.content.cloneNode(true);
@@ -83,7 +88,7 @@ const loadLeagueTable = async () => {
     );
 
     const data = await res.json();
-    const table = data.standings[0].table;
+    const table = data.standings.find(s => s.type === "TOTAL").table;
 
     const html = `
       <table class="league-table">
@@ -95,13 +100,27 @@ const loadLeagueTable = async () => {
           </tr>
         </thead>
         <tbody>
-          ${table.map(team => `
-            <tr class="${team.team.name.includes("West Ham") ? "highlight" : ""}">
-              <td>${team.position}</td>
-              <td style="text-align:left">${team.team.shortName}</td>
-              <td>${team.points}</td>
-            </tr>
-          `).join("")}
+          ${table.map(team => {
+            let rowClass = "";
+
+            if (team.position === 1) rowClass = "gold";
+            else if (team.position >= 2 && team.position <= 4) rowClass = "blue";
+            else if (team.position >= 5 && team.position <= 6) rowClass = "orange";
+            else if (team.position === 7) rowClass = "green";
+            else if (team.position >= 18) rowClass = "red";
+
+            if (team.team.name.includes("West Ham")) {
+              rowClass += " westham";
+            }
+
+            return `
+              <tr class="${rowClass}">
+                <td>${team.position}</td>
+                <td style="text-align:left">${team.team.shortName}</td>
+                <td>${team.points}</td>
+              </tr>
+            `;
+          }).join("")}
         </tbody>
       </table>
     `;
