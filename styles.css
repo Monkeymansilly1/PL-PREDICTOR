@@ -1,131 +1,93 @@
-:root {
-  --bg: #090d1f;
-  --text: #f2f5ff;
-}
-
 body {
   margin: 0;
-  font-family: Inter, system-ui, sans-serif;
-  background: radial-gradient(circle at top, #1b2c60, var(--bg) 50%);
-  color: var(--text);
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle at top, #1b2c60, #090d1f 50%);
+  color: #f2f5ff;
 }
 
 .app {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: auto;
   padding: 2rem;
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
-  margin-top: 2rem;
+h1 {
+  margin-bottom: 0.3rem;
 }
 
-@media (max-width: 900px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
+.layout {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1.5rem;
 }
 
 .card {
   background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
-  border-radius: 16px;
-  padding: 1.5rem;
   border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 1rem;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.fixtures-card {
+  flex: 2;
+}
+
+.table-card {
+  flex: 1;
 }
 
 button {
   padding: 0.5rem 1rem;
-  border-radius: 999px;
+  border-radius: 20px;
   border: none;
   cursor: pointer;
-  font-weight: 600;
   background: linear-gradient(120deg, #6ef2c5, #5fa4ff);
-  color: #06222f;
-}
-
-.fixtures {
-  margin-top: 1rem;
-  display: grid;
-  gap: 0.8rem;
+  font-weight: bold;
 }
 
 .fixture {
-  padding: 1rem;
-  border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.1);
-  display: flex;
-  justify-content: space-between;
+  padding: 0.7rem;
+  border-radius: 10px;
+  margin-bottom: 0.7rem;
 }
-
-.fixture small {
-  color: #b8c7ff;
-}
-
-/* Table */
 
 .league-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
+  text-align: center;
 }
 
 .league-table th,
 .league-table td {
   padding: 6px;
-  text-align: center;
-  font-size: 0.85rem;
 }
 
-.league-table th {
-  color: #aaa;
-}
+/* Position zones */
 
-.league-table tr {
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-/* Position colours */
-
-.pos-1 {
-  background: linear-gradient(90deg, #ffd700, #c9a000);
+.gold {
+  background: #ffd700;
   color: black;
-  font-weight: 700;
 }
 
-.pos-2,
-.pos-3,
-.pos-4 {
-  background: linear-gradient(90deg, #1e90ff, #0047ab);
-  color: white;
+.blue {
+  background: #1e5fd8;
 }
 
-.pos-5,
-.pos-6 {
-  background: linear-gradient(90deg, #ff9800, #c66900);
-  color: white;
+.orange {
+  background: #f08c00;
 }
 
-.pos-7 {
-  background: linear-gradient(90deg, #2ecc71, #1e8449);
-  color: white;
+.green {
+  background: #2f9e44;
 }
 
-.relegation {
-  background: linear-gradient(90deg, #ff4d4d, #990000);
-  color: white;
+.red {
+  background: #c92a2a;
 }
 
-/* West Ham glow */
-.highlight {
-  outline: 2px solid #1e90ff;
-  box-shadow: 0 0 12px rgba(30,144,255,0.7);
+/* West Ham highlight */
+.westham {
+  box-shadow: inset 4px 0 0 #00bfff;
+  font-weight: bold;
 }
