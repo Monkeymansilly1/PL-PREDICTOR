@@ -4,7 +4,7 @@ const template = document.querySelector("#fixtureTemplate");
 const refreshBtn = document.querySelector("#refreshBtn");
 const tableContainer = document.querySelector("#tableContainer");
 
-const API_KEY = "YOUR_API_KEY_HERE"; // Replace with regenerated key
+const API_KEY = "4d462e0edd4a473b8012c9b246108674"; // Replace with regenerated key
 
 // Free-tier competitions
 const competitions = ["PL", "FAC"];
