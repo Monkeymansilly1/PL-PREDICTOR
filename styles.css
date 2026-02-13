@@ -1,22 +1,29 @@
 :root {
-  --bg: #0b132b;
-  --card: #1c2541;
+  --bg: #090d1f;
+  --card: #111831;
+  --text: #f2f5ff;
   --accent: #6ef2c5;
-  --highlight: #1e90ff;
-  --text: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background: linear-gradient(180deg, #0b132b, #000814);
+  font-family: Inter, system-ui, sans-serif;
+  background: radial-gradient(circle at top, #1b2c60, var(--bg) 50%);
   color: var(--text);
 }
 
 .app {
   max-width: 1200px;
-  margin: 0 auto;
+  margin: auto;
   padding: 2rem;
+}
+
+.app__header h1 {
+  margin-bottom: 0.3rem;
 }
 
 .layout {
@@ -33,9 +40,10 @@ body {
 }
 
 .card {
-  background: var(--card);
-  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+  border-radius: 16px;
   padding: 1.5rem;
+  border: 1px solid rgba(255,255,255,0.15);
 }
 
 .card-header {
@@ -45,35 +53,38 @@ body {
 }
 
 button {
-  background: var(--accent);
-  border: none;
   padding: 0.5rem 1rem;
   border-radius: 999px;
+  border: none;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
+  background: linear-gradient(120deg, #6ef2c5, #5fa4ff);
+  color: #06222f;
+}
+
+button:hover {
+  filter: brightness(1.1);
 }
 
 .fixtures {
   margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  gap: 0.8rem;
 }
 
 .fixture {
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.05);
 }
 
-.fixture__league,
-.fixture__time {
-  font-size: 0.85rem;
-  color: #bbb;
+.fixture small {
+  color: #b8c7ff;
 }
+
+/* League Table */
 
 .league-table {
   width: 100%;
@@ -85,11 +96,11 @@ button {
 .league-table td {
   padding: 6px;
   text-align: center;
+  font-size: 0.85rem;
 }
 
 .league-table th {
   color: #aaa;
-  font-size: 0.8rem;
 }
 
 .league-table tr {
@@ -97,7 +108,8 @@ button {
 }
 
 .league-table tr.highlight {
-  background: var(--highlight);
+  background: linear-gradient(90deg, #1e90ff, #0047ab);
   color: white;
-  font-weight: bold;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(30,144,255,0.5);
 }
