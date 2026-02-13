@@ -4,18 +4,15 @@ const template = document.querySelector("#fixtureTemplate");
 const refreshBtn = document.querySelector("#refreshBtn");
 const tableContainer = document.querySelector("#tableContainer");
 
-const API_KEY = "4d462e0edd4a473b8012c9b246108674"; // Replace with regenerated key
+const API_KEY = "4d462e0edd4a473b8012c9b246108674"; // Replace this
+const TEAM_ID = 563; // West Ham United
 
-// Free-tier competitions
-const competitions = ["PL", "FAC"];
+/* ===============================
+   FIXTURES (WEST HAM ONLY)
+=================================*/
 
 const renderFixtures = (matches) => {
   fixturesContainer.innerHTML = "";
-
-  if (!matches.length) {
-    statusText.textContent = "No upcoming matches found.";
-    return;
-  }
 
   matches.forEach(match => {
     const fragment = template.content.cloneNode(true);
@@ -27,7 +24,7 @@ const renderFixtures = (matches) => {
       match.competition.name;
 
     fragment.querySelector(".fixture__time").textContent =
-      `Kickoff: ${new Date(match.utcDate).toLocaleString()}`;
+      `Kickoff: ${new Date(match.utcDate).toLocaleString("en-GB")}`;
 
     fragment.querySelector(".fixture__score").textContent =
       "Upcoming fixture";
@@ -41,27 +38,28 @@ const loadFixtures = async () => {
   refreshBtn.disabled = true;
 
   try {
-    let allMatches = [];
+    const url =
+      `https://corsproxy.io/?https://api.football-data.org/v4/teams/${TEAM_ID}/matches?status=SCHEDULED`;
 
-    for (let comp of competitions) {
-      const url =
-        `https://corsproxy.io/?https://api.football-data.org/v4/competitions/${comp}/matches?status=SCHEDULED`;
+    const res = await fetch(url, {
+      headers: {
+        "X-Auth-Token": API_KEY
+      }
+    });
 
-      const res = await fetch(url, {
-        headers: { "X-Auth-Token": API_KEY }
-      });
+    if (!res.ok) throw new Error("Fixture request failed");
 
-      const data = await res.json();
+    const data = await res.json();
+    const matches = data.matches || [];
 
-      const westHamMatches = (data.matches || []).filter(match =>
-        match.homeTeam.name.includes("West Ham") ||
-        match.awayTeam.name.includes("West Ham")
-      );
-
-      allMatches.push(...westHamMatches);
+    if (!matches.length) {
+      statusText.textContent = "No upcoming matches found.";
+      fixturesContainer.innerHTML = "";
+      refreshBtn.disabled = false;
+      return;
     }
 
-    const sorted = allMatches.sort(
+    const sorted = matches.sort(
       (a, b) => new Date(a.utcDate) - new Date(b.utcDate)
     );
 
@@ -78,6 +76,10 @@ const loadFixtures = async () => {
   refreshBtn.disabled = false;
 };
 
+/* ===============================
+   PREMIER LEAGUE TABLE
+=================================*/
+
 const loadLeagueTable = async () => {
   try {
     const res = await fetch(
@@ -86,6 +88,8 @@ const loadLeagueTable = async () => {
         headers: { "X-Auth-Token": API_KEY }
       }
     );
+
+    if (!res.ok) throw new Error("Table request failed");
 
     const data = await res.json();
     const table = data.standings.find(s => s.type === "TOTAL").table;
@@ -131,6 +135,10 @@ const loadLeagueTable = async () => {
     console.error("Table error:", err);
   }
 };
+
+/* ===============================
+   INIT
+=================================*/
 
 refreshBtn.addEventListener("click", loadFixtures);
 
