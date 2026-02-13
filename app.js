@@ -1,5 +1,5 @@
 const API_KEY = "YOUR_API_KEY_HERE";
-const TEAM_ID = 563; // West Ham
+const TEAM_ID = 563;
 
 const fixturesContainer = document.querySelector("#fixtures");
 const statusText = document.querySelector("#status");
@@ -7,7 +7,7 @@ const refreshBtn = document.querySelector("#refreshBtn");
 const tableContainer = document.querySelector("#tableContainer");
 
 const FIXTURE_URL =
-  `https://corsproxy.io/?https://api.football-data.org/v4/teams/${TEAM_ID}/matches?status=SCHEDULED`;
+  `https://corsproxy.io/?https://api.football-data.org/v4/teams/${TEAM_ID}/matches?limit=50`;
 
 const loadFixtures = async () => {
   statusText.textContent = "Loading West Ham fixtures...";
@@ -20,28 +20,33 @@ const loadFixtures = async () => {
 
     const data = await res.json();
 
-    if (!data.matches || !data.matches.length) {
+    if (!data.matches) {
+      statusText.textContent = "No fixture data.";
+      return;
+    }
+
+    const now = new Date();
+
+    const upcoming = data.matches
+      .filter(match => new Date(match.utcDate) > now)
+      .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
+
+    if (!upcoming.length) {
       statusText.textContent = "No upcoming matches found.";
       fixturesContainer.innerHTML = "";
       return;
     }
 
-    const sorted = data.matches.sort(
-      (a, b) => new Date(a.utcDate) - new Date(b.utcDate)
-    );
+    statusText.textContent = `Showing ${upcoming.length} upcoming matches`;
 
-    statusText.textContent = `Showing ${sorted.length} upcoming matches`;
-
-    fixturesContainer.innerHTML = sorted.map(match => `
+    fixturesContainer.innerHTML = upcoming.map(match => `
       <div class="fixture">
         <div>
           <strong>${match.homeTeam.name} vs ${match.awayTeam.name}</strong><br>
           <small>${match.competition.name}</small><br>
           <small>${new Date(match.utcDate).toLocaleString("en-GB")}</small>
         </div>
-        <div>
-          Upcoming
-        </div>
+        <div>Upcoming</div>
       </div>
     `).join("");
 
@@ -53,23 +58,20 @@ const loadFixtures = async () => {
   }
 };
 
-/* League Table (TheSportsDB – free) */
-
 const loadLeagueTable = async () => {
   try {
     const res = await fetch(
-      "https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2025-2026"
+      "https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328"
     );
 
     const data = await res.json();
 
     if (!data.table) {
-      tableContainer.innerHTML = "No table data.";
+      tableContainer.innerHTML = "Table not available.";
       return;
     }
 
     const sorted = data.table.sort((a, b) => a.intRank - b.intRank);
-
     const totalTeams = sorted.length;
 
     tableContainer.innerHTML = `
