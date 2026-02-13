@@ -2,7 +2,6 @@
   --bg: #090d1f;
   --card: #111831;
   --text: #f2f5ff;
-  --accent: #6ef2c5;
 }
 
 * {
@@ -107,9 +106,39 @@ button:hover {
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-.league-table tr.highlight {
+/* Position colours */
+
+.pos-1 {
+  background: linear-gradient(90deg, #ffd700, #c9a000);
+  color: black;
+  font-weight: 700;
+}
+
+.pos-2,
+.pos-3,
+.pos-4 {
   background: linear-gradient(90deg, #1e90ff, #0047ab);
   color: white;
-  font-weight: 700;
-  box-shadow: 0 0 10px rgba(30,144,255,0.5);
+}
+
+.pos-5,
+.pos-6 {
+  background: linear-gradient(90deg, #ff9800, #c66900);
+  color: white;
+}
+
+.pos-7 {
+  background: linear-gradient(90deg, #2ecc71, #1e8449);
+  color: white;
+}
+
+.relegation {
+  background: linear-gradient(90deg, #ff4d4d, #990000);
+  color: white;
+}
+
+/* West Ham glow highlight */
+.highlight {
+  outline: 2px solid #1e90ff;
+  box-shadow: 0 0 12px rgba(30,144,255,0.7);
 }
