@@ -3,9 +3,15 @@ const statusText = document.querySelector("#status");
 const template = document.querySelector("#fixtureTemplate");
 const refreshBtn = document.querySelector("#refreshBtn");
 
+console.log("WEST HAM TEAM ENDPOINT LOADED");
+
 const API_KEY = "4d462e0edd4a473b8012c9b246108674";
 
-const competitions = ["PL", "FAC"]; // Premier League + FA Cup
+// West Ham team ID on Football-Data
+const TEAM_ID = 563;
+
+const URL =
+  `https://corsproxy.io/?https://api.football-data.org/v4/teams/${TEAM_ID}/matches`;
 
 const renderFixtures = (matches) => {
   fixturesContainer.innerHTML = "";
@@ -22,50 +28,47 @@ const renderFixtures = (matches) => {
     fragment.querySelector(".fixture__time").textContent =
       `Date: ${new Date(match.utcDate).toLocaleString()}`;
 
-    fragment.querySelector(".fixture__score").textContent =
-      match.status === "FINISHED"
-        ? `Final score: ${match.score.fullTime.home}-${match.score.fullTime.away}`
-        : "Upcoming fixture";
+    const scoreEl = fragment.querySelector(".fixture__score");
+
+    if (match.status === "FINISHED") {
+      scoreEl.textContent =
+        `Final score: ${match.score.fullTime.home}-${match.score.fullTime.away}`;
+    } else {
+      scoreEl.textContent = "Upcoming fixture";
+    }
 
     fixturesContainer.appendChild(fragment);
   });
 };
 
 const loadFixtures = async () => {
-  statusText.textContent = "Loading West Ham fixtures...";
+  statusText.textContent = "Loading West Ham matches...";
   refreshBtn.disabled = true;
 
   try {
-    let allMatches = [];
+    const res = await fetch(URL, {
+      headers: {
+        "X-Auth-Token": API_KEY
+      }
+    });
 
-    for (let comp of competitions) {
-      const url =
-        `https://corsproxy.io/?https://api.football-data.org/v4/competitions/${comp}/matches?status=SCHEDULED`;
+    const data = await res.json();
 
-      const res = await fetch(url, {
-        headers: { "X-Auth-Token": API_KEY }
-      });
-
-      const data = await res.json();
-
-      const westHamMatches = data.matches.filter(match =>
-        match.homeTeam.name.includes("West Ham") ||
-        match.awayTeam.name.includes("West Ham")
-      );
-
-      allMatches.push(...westHamMatches);
-    }
-
-    if (!allMatches.length) {
-      statusText.textContent = "No West Ham fixtures found.";
+    if (!data.matches || !data.matches.length) {
+      statusText.textContent = "No matches found.";
       fixturesContainer.innerHTML = "";
       return;
     }
 
-    statusText.textContent =
-      `Showing ${allMatches.length} West Ham fixtures`;
+    // Sort by newest first
+    const sorted = data.matches.sort(
+      (a, b) => new Date(b.utcDate) - new Date(a.utcDate)
+    );
 
-    renderFixtures(allMatches);
+    statusText.textContent =
+      `Showing ${sorted.length} West Ham matches`;
+
+    renderFixtures(sorted.slice(0, 15));
 
   } catch (err) {
     console.error(err);
