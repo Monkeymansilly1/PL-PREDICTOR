@@ -2,14 +2,12 @@ const fixturesContainer = document.querySelector("#fixtures");
 const statusText = document.querySelector("#status");
 const template = document.querySelector("#fixtureTemplate");
 const refreshBtn = document.querySelector("#refreshBtn");
-
-console.log("FREE PLAN VERSION LOADED");
+const tableContainer = document.querySelector("#tableContainer");
 
 const API_KEY = "4d462e0edd4a473b8012c9b246108674";
 
-const competitions = ["PL", "FAC"]; // Premier League + FA Cup
-
-const norm = (s = "") => s.toLowerCase();
+// Competitions allowed on free plan
+const competitions = ["PL", "FAC"];
 
 const renderFixtures = (matches) => {
   fixturesContainer.innerHTML = "";
@@ -34,7 +32,7 @@ const renderFixtures = (matches) => {
 };
 
 const loadFixtures = async () => {
-  statusText.textContent = "Loading West Ham upcoming fixtures...";
+  statusText.textContent = "Loading fixtures...";
   refreshBtn.disabled = true;
 
   try {
@@ -51,18 +49,11 @@ const loadFixtures = async () => {
       const data = await res.json();
 
       const westHamMatches = (data.matches || []).filter(match =>
-        norm(match.homeTeam.name).includes("west ham") ||
-        norm(match.awayTeam.name).includes("west ham")
+        match.homeTeam.name.includes("West Ham") ||
+        match.awayTeam.name.includes("West Ham")
       );
 
       allMatches.push(...westHamMatches);
-    }
-
-    if (!allMatches.length) {
-      statusText.textContent =
-        "West Ham not found in returned competition windows.";
-      fixturesContainer.innerHTML = "";
-      return;
     }
 
     const sorted = allMatches.sort(
@@ -76,11 +67,53 @@ const loadFixtures = async () => {
 
   } catch (err) {
     console.error(err);
-    statusText.textContent = "Failed to load matches.";
+    statusText.textContent = "Failed to load fixtures.";
   }
 
   refreshBtn.disabled = false;
 };
 
+const loadLeagueTable = async () => {
+  try {
+    const res = await fetch(
+      "https://corsproxy.io/?https://api.football-data.org/v4/competitions/PL/standings",
+      {
+        headers: { "X-Auth-Token": API_KEY }
+      }
+    );
+
+    const data = await res.json();
+    const table = data.standings[0].table;
+
+    const html = `
+      <table class="league-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Team</th>
+            <th>Pts</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${table.map(team => `
+            <tr class="${team.team.name.includes("West Ham") ? "highlight" : ""}">
+              <td>${team.position}</td>
+              <td style="text-align:left">${team.team.shortName}</td>
+              <td>${team.points}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+
+    tableContainer.innerHTML = html;
+
+  } catch (err) {
+    console.error("Table error:", err);
+  }
+};
+
 refreshBtn.addEventListener("click", loadFixtures);
+
 loadFixtures();
+loadLeagueTable();
