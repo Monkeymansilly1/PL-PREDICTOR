@@ -3,17 +3,13 @@ const statusText = document.querySelector("#status");
 const template = document.querySelector("#fixtureTemplate");
 const refreshBtn = document.querySelector("#refreshBtn");
 
-console.log("WEST HAM UPCOMING VERSION LOADED");
+console.log("WEST HAM UPCOMING FIXED VERSION");
 
-// Your Football-Data API key
 const API_KEY = "4d462e0edd4a473b8012c9b246108674";
-
-// West Ham United team ID (Football-Data)
 const TEAM_ID = 563;
 
-// Upcoming matches only
 const URL =
-  `https://corsproxy.io/?https://api.football-data.org/v4/teams/${TEAM_ID}/matches?status=SCHEDULED&limit=50`;
+  `https://corsproxy.io/?https://api.football-data.org/v4/teams/${TEAM_ID}/matches?status=SCHEDULED&dateFrom=2025-01-01&dateTo=2026-12-31&limit=100`;
 
 const renderFixtures = (matches) => {
   fixturesContainer.innerHTML = "";
@@ -21,20 +17,16 @@ const renderFixtures = (matches) => {
   matches.forEach(match => {
     const fragment = template.content.cloneNode(true);
 
-    // Teams
     fragment.querySelector(".fixture__name").textContent =
       `${match.homeTeam.name} vs ${match.awayTeam.name}`;
 
-    // Competition
     fragment.querySelector(".fixture__league").textContent =
       match.competition.name;
 
-    // Date (converted to local time)
     const date = new Date(match.utcDate);
     fragment.querySelector(".fixture__time").textContent =
       `Kickoff: ${date.toLocaleString()}`;
 
-    // Always upcoming
     fragment.querySelector(".fixture__score").textContent =
       "Upcoming fixture";
 
@@ -48,9 +40,7 @@ const loadFixtures = async () => {
 
   try {
     const res = await fetch(URL, {
-      headers: {
-        "X-Auth-Token": API_KEY
-      }
+      headers: { "X-Auth-Token": API_KEY }
     });
 
     const data = await res.json();
@@ -61,7 +51,6 @@ const loadFixtures = async () => {
       return;
     }
 
-    // Sort soonest first
     const sorted = data.matches.sort(
       (a, b) => new Date(a.utcDate) - new Date(b.utcDate)
     );
