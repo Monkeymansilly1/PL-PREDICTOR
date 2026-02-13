@@ -1,91 +1,75 @@
+const API_KEY = "YOUR_API_KEY_HERE";
+const TEAM_ID = 563; // West Ham
+
 const fixturesContainer = document.querySelector("#fixtures");
 const statusText = document.querySelector("#status");
-const template = document.querySelector("#fixtureTemplate");
 const refreshBtn = document.querySelector("#refreshBtn");
 const tableContainer = document.querySelector("#tableContainer");
 
-const API_KEY = "4d462e0edd4a473b8012c9b246108674";
-
-// Competitions allowed on free plan
-const competitions = ["PL", "FAC"];
-
-const renderFixtures = (matches) => {
-  fixturesContainer.innerHTML = "";
-
-  matches.forEach(match => {
-    const fragment = template.content.cloneNode(true);
-
-    fragment.querySelector(".fixture__name").textContent =
-      `${match.homeTeam.name} vs ${match.awayTeam.name}`;
-
-    fragment.querySelector(".fixture__league").textContent =
-      match.competition.name;
-
-    fragment.querySelector(".fixture__time").textContent =
-      `Kickoff: ${new Date(match.utcDate).toLocaleString()}`;
-
-    fragment.querySelector(".fixture__score").textContent =
-      "Upcoming fixture";
-
-    fixturesContainer.appendChild(fragment);
-  });
-};
+const FIXTURE_URL =
+  `https://corsproxy.io/?https://api.football-data.org/v4/teams/${TEAM_ID}/matches?status=SCHEDULED`;
 
 const loadFixtures = async () => {
-  statusText.textContent = "Loading fixtures...";
+  statusText.textContent = "Loading West Ham fixtures...";
   refreshBtn.disabled = true;
 
   try {
-    let allMatches = [];
+    const res = await fetch(FIXTURE_URL, {
+      headers: { "X-Auth-Token": API_KEY }
+    });
 
-    for (let comp of competitions) {
-      const url =
-        `https://corsproxy.io/?https://api.football-data.org/v4/competitions/${comp}/matches?status=SCHEDULED`;
+    const data = await res.json();
 
-      const res = await fetch(url, {
-        headers: { "X-Auth-Token": API_KEY }
-      });
-
-      const data = await res.json();
-
-      const westHamMatches = (data.matches || []).filter(match =>
-        match.homeTeam.name.includes("West Ham") ||
-        match.awayTeam.name.includes("West Ham")
-      );
-
-      allMatches.push(...westHamMatches);
+    if (!data.matches || !data.matches.length) {
+      statusText.textContent = "No upcoming matches found.";
+      fixturesContainer.innerHTML = "";
+      return;
     }
 
-    const sorted = allMatches.sort(
+    const sorted = data.matches.sort(
       (a, b) => new Date(a.utcDate) - new Date(b.utcDate)
     );
 
-    statusText.textContent =
-      `Showing ${sorted.length} upcoming West Ham matches`;
+    statusText.textContent = `Showing ${sorted.length} upcoming matches`;
 
-    renderFixtures(sorted);
+    fixturesContainer.innerHTML = sorted.map(match => `
+      <div class="fixture">
+        <div>
+          <strong>${match.homeTeam.name} vs ${match.awayTeam.name}</strong><br>
+          <small>${match.competition.name}</small><br>
+          <small>${new Date(match.utcDate).toLocaleString("en-GB")}</small>
+        </div>
+        <div>
+          Upcoming
+        </div>
+      </div>
+    `).join("");
 
   } catch (err) {
     console.error(err);
     statusText.textContent = "Failed to load fixtures.";
+  } finally {
+    refreshBtn.disabled = false;
   }
-
-  refreshBtn.disabled = false;
 };
 
+/* Premier League Table from TheSportsDB */
 const loadLeagueTable = async () => {
   try {
     const res = await fetch(
-      "https://corsproxy.io/?https://api.football-data.org/v4/competitions/PL/standings",
-      {
-        headers: { "X-Auth-Token": API_KEY }
-      }
+      "https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2025-2026"
     );
 
     const data = await res.json();
-    const table = data.standings[0].table;
 
-    const html = `
+    if (!data.table) {
+      tableContainer.innerHTML = "No table data.";
+      return;
+    }
+
+    const sorted = data.table.sort((a, b) => a.intRank - b.intRank);
+
+    tableContainer.innerHTML = `
       <table class="league-table">
         <thead>
           <tr>
@@ -95,21 +79,20 @@ const loadLeagueTable = async () => {
           </tr>
         </thead>
         <tbody>
-          ${table.map(team => `
-            <tr class="${team.team.name.includes("West Ham") ? "highlight" : ""}">
-              <td>${team.position}</td>
-              <td style="text-align:left">${team.team.shortName}</td>
-              <td>${team.points}</td>
+          ${sorted.map(team => `
+            <tr class="${team.strTeam.includes("West Ham") ? "highlight" : ""}">
+              <td>${team.intRank}</td>
+              <td style="text-align:left">${team.strTeam}</td>
+              <td>${team.intPoints}</td>
             </tr>
           `).join("")}
         </tbody>
       </table>
     `;
 
-    tableContainer.innerHTML = html;
-
   } catch (err) {
-    console.error("Table error:", err);
+    console.error(err);
+    tableContainer.innerHTML = "Failed to load table.";
   }
 };
 
