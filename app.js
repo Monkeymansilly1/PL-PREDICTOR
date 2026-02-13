@@ -3,15 +3,17 @@ const statusText = document.querySelector("#status");
 const template = document.querySelector("#fixtureTemplate");
 const refreshBtn = document.querySelector("#refreshBtn");
 
-console.log("WEST HAM TEAM ENDPOINT LOADED");
+console.log("WEST HAM UPCOMING VERSION LOADED");
 
+// Your Football-Data API key
 const API_KEY = "4d462e0edd4a473b8012c9b246108674";
 
-// West Ham team ID on Football-Data
+// West Ham United team ID (Football-Data)
 const TEAM_ID = 563;
 
+// Upcoming matches only
 const URL =
-  `https://corsproxy.io/?https://api.football-data.org/v4/teams/${TEAM_ID}/matches`;
+  `https://corsproxy.io/?https://api.football-data.org/v4/teams/${TEAM_ID}/matches?status=SCHEDULED&limit=50`;
 
 const renderFixtures = (matches) => {
   fixturesContainer.innerHTML = "";
@@ -19,30 +21,29 @@ const renderFixtures = (matches) => {
   matches.forEach(match => {
     const fragment = template.content.cloneNode(true);
 
+    // Teams
     fragment.querySelector(".fixture__name").textContent =
       `${match.homeTeam.name} vs ${match.awayTeam.name}`;
 
+    // Competition
     fragment.querySelector(".fixture__league").textContent =
       match.competition.name;
 
+    // Date (converted to local time)
+    const date = new Date(match.utcDate);
     fragment.querySelector(".fixture__time").textContent =
-      `Date: ${new Date(match.utcDate).toLocaleString()}`;
+      `Kickoff: ${date.toLocaleString()}`;
 
-    const scoreEl = fragment.querySelector(".fixture__score");
-
-    if (match.status === "FINISHED") {
-      scoreEl.textContent =
-        `Final score: ${match.score.fullTime.home}-${match.score.fullTime.away}`;
-    } else {
-      scoreEl.textContent = "Upcoming fixture";
-    }
+    // Always upcoming
+    fragment.querySelector(".fixture__score").textContent =
+      "Upcoming fixture";
 
     fixturesContainer.appendChild(fragment);
   });
 };
 
 const loadFixtures = async () => {
-  statusText.textContent = "Loading West Ham matches...";
+  statusText.textContent = "Loading West Ham upcoming fixtures...";
   refreshBtn.disabled = true;
 
   try {
@@ -55,24 +56,25 @@ const loadFixtures = async () => {
     const data = await res.json();
 
     if (!data.matches || !data.matches.length) {
-      statusText.textContent = "No matches found.";
+      statusText.textContent = "No upcoming matches found.";
       fixturesContainer.innerHTML = "";
       return;
     }
 
-    // Sort by newest first
+    // Sort soonest first
     const sorted = data.matches.sort(
-      (a, b) => new Date(b.utcDate) - new Date(a.utcDate)
+      (a, b) => new Date(a.utcDate) - new Date(b.utcDate)
     );
 
     statusText.textContent =
-      `Showing ${sorted.length} West Ham matches`;
+      `Showing ${sorted.length} upcoming West Ham matches`;
 
-    renderFixtures(sorted.slice(0, 15));
+    renderFixtures(sorted);
 
   } catch (err) {
     console.error(err);
     statusText.textContent = "Failed to load matches.";
+    fixturesContainer.innerHTML = "";
   }
 
   refreshBtn.disabled = false;
