@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>West Ham Fixtures</title>
+  <title>West Ham United</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -13,18 +13,27 @@
       <p>Upcoming fixtures in all competitions.</p>
     </header>
 
-    <section class="card controls">
-      <button id="refreshBtn">Refresh Fixtures</button>
-    </section>
+    <div class="layout">
 
-    <section class="card">
-      <h2>Upcoming Matches</h2>
-      <p id="status">Loading West Ham fixtures...</p>
-      <div id="fixtures" class="fixtures"></div>
-    </section>
+      <!-- Fixtures -->
+      <section class="card">
+        <div class="card-header">
+          <h2>Upcoming Matches</h2>
+          <button id="refreshBtn">Refresh Fixtures</button>
+        </div>
+        <p id="status">Loading...</p>
+        <div id="fixtures" class="fixtures"></div>
+      </section>
+
+      <!-- League Table -->
+      <section class="card">
+        <h2>Premier League Table</h2>
+        <div id="tableContainer"></div>
+      </section>
+
+    </div>
   </main>
 
-  <!-- Template for each match -->
   <template id="fixtureTemplate">
     <article class="fixture">
       <div>
@@ -32,13 +41,10 @@
         <p class="fixture__league"></p>
         <p class="fixture__time"></p>
       </div>
-      <div>
-        <p class="fixture__score"></p>
-        <p class="fixture__prediction"></p>
-      </div>
+      <p class="fixture__score"></p>
     </article>
   </template>
 
- <script src="app.js?v=13" defer></script>
+  <script src="app.js?v=20" defer></script>
 </body>
 </html>
