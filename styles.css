@@ -1,11 +1,6 @@
 :root {
   --bg: #090d1f;
-  --card: #111831;
   --text: #f2f5ff;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 body {
@@ -19,10 +14,6 @@ body {
   max-width: 1200px;
   margin: auto;
   padding: 2rem;
-}
-
-.app__header h1 {
-  margin-bottom: 0.3rem;
 }
 
 .layout {
@@ -61,10 +52,6 @@ button {
   color: #06222f;
 }
 
-button:hover {
-  filter: brightness(1.1);
-}
-
 .fixtures {
   margin-top: 1rem;
   display: grid;
@@ -79,11 +66,7 @@ button:hover {
   justify-content: space-between;
 }
 
-.fixture small {
-  color: #b8c7ff;
-}
-
-/* League Table */
+/* Table */
 
 .league-table {
   width: 100%;
@@ -106,7 +89,7 @@ button:hover {
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-/* Position colours */
+/* Position colouring */
 
 .pos-1 {
   background: linear-gradient(90deg, #ffd700, #c9a000);
@@ -137,7 +120,7 @@ button:hover {
   color: white;
 }
 
-/* West Ham glow highlight */
+/* West Ham highlight glow */
 .highlight {
   outline: 2px solid #1e90ff;
   box-shadow: 0 0 12px rgba(30,144,255,0.7);
