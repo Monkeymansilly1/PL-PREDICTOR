@@ -1,146 +1,121 @@
-const fixturesContainer = document.querySelector("#fixtures");
-const statusText = document.querySelector("#status");
-const template = document.querySelector("#fixtureTemplate");
-const refreshBtn = document.querySelector("#refreshBtn");
-const tableContainer = document.querySelector("#tableContainer");
+const API_KEY = "4d462e0edd4a473b8012c9b246108674"
 
-const API_KEY = "4d462e0edd4a473b8012c9b246108674"; // Replace this
-const TEAM_ID = 563; // West Ham United
+const TEAM_ID = 563 // West Ham
 
-/* ===============================
-   FIXTURES (WEST HAM ONLY)
-=================================*/
+async function loadFixtures(){
 
-const renderFixtures = (matches) => {
-  fixturesContainer.innerHTML = "";
+const fixturesDiv = document.getElementById("fixtures")
 
-  matches.forEach(match => {
-    const fragment = template.content.cloneNode(true);
+fixturesDiv.innerHTML = "Loading..."
 
-    fragment.querySelector(".fixture__name").textContent =
-      `${match.homeTeam.name} vs ${match.awayTeam.name}`;
+try{
 
-    fragment.querySelector(".fixture__league").textContent =
-      match.competition.name;
+const res = await fetch(
+`https://api.football-data.org/v4/teams/${TEAM_ID}/matches?status=SCHEDULED`,
+{
+headers:{ "X-Auth-Token":API_KEY }
+})
 
-    fragment.querySelector(".fixture__time").textContent =
-      `Kickoff: ${new Date(match.utcDate).toLocaleString("en-GB")}`;
+const data = await res.json()
 
-    fragment.querySelector(".fixture__score").textContent =
-      "Upcoming fixture";
+fixturesDiv.innerHTML=""
 
-    fixturesContainer.appendChild(fragment);
-  });
-};
+data.matches.slice(0,10).forEach(match=>{
 
-const loadFixtures = async () => {
-  statusText.textContent = "Loading fixtures...";
-  refreshBtn.disabled = true;
+const home = match.homeTeam.name
+const away = match.awayTeam.name
+const date = new Date(match.utcDate).toLocaleDateString()
 
-  try {
-    const url =
-      `https://corsproxy.io/?https://api.football-data.org/v4/teams/${TEAM_ID}/matches?status=SCHEDULED`;
+fixturesDiv.innerHTML +=
+`<p>${home} vs ${away}<br>${date}</p>`
 
-    const res = await fetch(url, {
-      headers: {
-        "X-Auth-Token": API_KEY
-      }
-    });
+})
 
-    if (!res.ok) throw new Error("Fixture request failed");
+}catch{
 
-    const data = await res.json();
-    const matches = data.matches || [];
+fixturesDiv.innerHTML="Failed to load fixtures"
 
-    if (!matches.length) {
-      statusText.textContent = "No upcoming matches found.";
-      fixturesContainer.innerHTML = "";
-      refreshBtn.disabled = false;
-      return;
-    }
+}
 
-    const sorted = matches.sort(
-      (a, b) => new Date(a.utcDate) - new Date(b.utcDate)
-    );
+}
 
-    statusText.textContent =
-      `Showing ${sorted.length} upcoming West Ham matches`;
+async function loadTable(){
 
-    renderFixtures(sorted);
+const tbody = document.getElementById("table-body")
 
-  } catch (err) {
-    console.error(err);
-    statusText.textContent = "Failed to load fixtures.";
-  }
+const res = await fetch(
+"https://api.football-data.org/v4/competitions/PL/standings",
+{
+headers:{ "X-Auth-Token":API_KEY }
+})
 
-  refreshBtn.disabled = false;
-};
+const data = await res.json()
 
-/* ===============================
-   PREMIER LEAGUE TABLE
-=================================*/
+const table = data.standings[0].table
 
-const loadLeagueTable = async () => {
-  try {
-    const res = await fetch(
-      "https://corsproxy.io/?https://api.football-data.org/v4/competitions/PL/standings",
-      {
-        headers: { "X-Auth-Token": API_KEY }
-      }
-    );
+tbody.innerHTML=""
 
-    if (!res.ok) throw new Error("Table request failed");
+table.forEach(team=>{
 
-    const data = await res.json();
-    const table = data.standings.find(s => s.type === "TOTAL").table;
+let className=""
 
-    const html = `
-      <table class="league-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Team</th>
-            <th>Pts</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${table.map(team => {
-            let rowClass = "";
+if(team.position===1) className="gold"
+else if(team.position<=4) className="blue"
+else if(team.position<=6) className="orange"
+else if(team.position===7) className="green"
+else if(team.position>=18) className="red"
 
-            if (team.position === 1) rowClass = "gold";
-            else if (team.position >= 2 && team.position <= 4) rowClass = "blue";
-            else if (team.position >= 5 && team.position <= 6) rowClass = "orange";
-            else if (team.position === 7) rowClass = "green";
-            else if (team.position >= 18) rowClass = "red";
+if(team.team.name.includes("West Ham"))
+className += " westham"
 
-            if (team.team.name.includes("West Ham")) {
-              rowClass += " westham";
-            }
+tbody.innerHTML +=
+`<tr class="${className}">
+<td>${team.position}</td>
+<td>${team.team.name}</td>
+<td>${team.points}</td>
+</tr>`
 
-            return `
-              <tr class="${rowClass}">
-                <td>${team.position}</td>
-                <td style="text-align:left">${team.team.shortName}</td>
-                <td>${team.points}</td>
-              </tr>
-            `;
-          }).join("")}
-        </tbody>
-      </table>
-    `;
+})
 
-    tableContainer.innerHTML = html;
+}
 
-  } catch (err) {
-    console.error("Table error:", err);
-  }
-};
+async function runPrediction(){
 
-/* ===============================
-   INIT
-=================================*/
+const prediction = document.getElementById("prediction")
 
-refreshBtn.addEventListener("click", loadFixtures);
+prediction.innerHTML="Simulating season..."
 
-loadFixtures();
-loadLeagueTable();
+const res = await fetch(
+"https://api.football-data.org/v4/competitions/PL/standings",
+{
+headers:{ "X-Auth-Token":API_KEY }
+})
+
+const data = await res.json()
+
+const table = data.standings[0].table
+
+const westHam = table.find(t =>
+t.team.name.includes("West Ham")
+)
+
+let points = westHam.points
+let played = westHam.playedGames
+let remaining = 38 - played
+
+for(let i=0;i<remaining;i++){
+
+const r = Math.random()
+
+if(r<0.4) points+=3
+else if(r<0.65) points+=1
+
+}
+
+prediction.innerHTML =
+`Predicted final points: ${points}`
+
+}
+
+loadFixtures()
+loadTable()
