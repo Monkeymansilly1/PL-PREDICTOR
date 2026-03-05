@@ -1,99 +1,154 @@
-body{
-
-background:linear-gradient(180deg,#0a1533,#091a3d);
-font-family:Arial;
-color:white;
-text-align:center;
-
+* {
+  box-sizing: border-box;
 }
 
-.container{
-
-display:flex;
-justify-content:center;
-gap:30px;
-margin-top:20px;
-
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(to bottom, #071437, #0c1c4a);
+  color: white;
 }
 
-.card{
-
-background:rgba(255,255,255,0.05);
-padding:20px;
-border-radius:10px;
-width:320px;
-
+.app {
+  max-width: 1100px;
+  margin: auto;
+  padding: 40px 20px;
 }
 
-table{
-
-width:100%;
-border-collapse:collapse;
-
+header h1 {
+  margin-bottom: 5px;
 }
 
-td,th{
-
-padding:6px;
-
+header p {
+  opacity: 0.7;
+  margin-bottom: 30px;
 }
 
-.gold{
-
-background:#ffd700;
-color:black;
-
+/* Layout fix */
+.layout {
+  display: flex;
+  gap: 25px;
+  align-items: stretch; /* Important */
 }
 
-.blue{
-
-background:#2f6fe4;
-
+/* Cards */
+.card {
+  background: linear-gradient(145deg, #1b2c5a, #16244c);
+  border-radius: 12px;
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 500px;
 }
 
-.orange{
-
-background:#ff9500;
-
+.fixtures-card {
+  flex: 1.3;
 }
 
-.green{
-
-background:#2ecc71;
-
+.table-card {
+  flex: 1;
 }
 
-.red{
-
-background:#e74c3c;
-
+/* Scroll inside cards */
+#fixtures {
+  overflow-y: auto;
+  margin-top: 15px;
+  padding-right: 5px;
 }
 
-.westham{
-
-outline:2px solid #4da3ff;
-
+#tableContainer {
+  overflow-y: auto;
+  margin-top: 15px;
 }
 
-button{
-
-padding:8px 14px;
-border:none;
-border-radius:6px;
-background:#1abc9c;
-color:white;
-cursor:pointer;
-
+/* Fixtures */
+.fixture {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
 }
 
-button:hover{
-
-opacity:0.8;
-
+.fixture__name {
+  margin: 0 0 5px 0;
 }
 
-.predictor{
+.fixture__league,
+.fixture__time,
+.fixture__score {
+  font-size: 13px;
+  opacity: 0.8;
+}
 
+/* Table */
+.league-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.league-table th,
+.league-table td {
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.league-table th:nth-child(2),
+.league-table td:nth-child(2) {
+  text-align: left;
+}
+
+.league-table thead {
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Position colours */
+.pos-1 {
+  background: #ffd700;
+  color: black;
+}
+
+.pos-2,
+.pos-3 {
+  background: #2f66d2;
+}
+
+.pos-4,
+.pos-5,
+.pos-6 {
+  background: #f08c00;
+}
+
+.pos-7 {
+  background: #2f9e44;
+}
+
+.pos-18,
+.pos-19,
+.pos-20 {
+  background: #c92a2a;
+}
+
+/* West Ham highlight */
+.highlight {
+  border-left: 4px solid #00aaff;
+  font-weight: bold;
+}
+
+/* Button */
+button {
+  background: #5bc0de;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+button:hover {
+  background: #3aa7c9;
+}
 width:680px;
 margin:30px auto;
 
