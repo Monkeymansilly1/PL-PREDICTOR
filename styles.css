@@ -1,93 +1,100 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: radial-gradient(circle at top, #1b2c60, #090d1f 50%);
-  color: #f2f5ff;
+body{
+
+background:linear-gradient(180deg,#0a1533,#091a3d);
+font-family:Arial;
+color:white;
+text-align:center;
+
 }
 
-.app {
-  max-width: 1100px;
-  margin: auto;
-  padding: 2rem;
+.container{
+
+display:flex;
+justify-content:center;
+gap:30px;
+margin-top:20px;
+
 }
 
-h1 {
-  margin-bottom: 0.3rem;
+.card{
+
+background:rgba(255,255,255,0.05);
+padding:20px;
+border-radius:10px;
+width:320px;
+
 }
 
-.layout {
-  display: flex;
-  gap: 2rem;
-  margin-top: 1.5rem;
+table{
+
+width:100%;
+border-collapse:collapse;
+
 }
 
-.card {
-  background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 16px;
-  padding: 1rem;
+td,th{
+
+padding:6px;
+
 }
 
-.fixtures-card {
-  flex: 2;
+.gold{
+
+background:#ffd700;
+color:black;
+
 }
 
-.table-card {
-  flex: 1;
+.blue{
+
+background:#2f6fe4;
+
 }
 
-button {
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  background: linear-gradient(120deg, #6ef2c5, #5fa4ff);
-  font-weight: bold;
+.orange{
+
+background:#ff9500;
+
 }
 
-.fixture {
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 0.7rem;
-  border-radius: 10px;
-  margin-bottom: 0.7rem;
+.green{
+
+background:#2ecc71;
+
 }
 
-.league-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: center;
+.red{
+
+background:#e74c3c;
+
 }
 
-.league-table th,
-.league-table td {
-  padding: 6px;
+.westham{
+
+outline:2px solid #4da3ff;
+
 }
 
-/* Position zones */
+button{
 
-.gold {
-  background: #ffd700;
-  color: black;
+padding:8px 14px;
+border:none;
+border-radius:6px;
+background:#1abc9c;
+color:white;
+cursor:pointer;
+
 }
 
-.blue {
-  background: #1e5fd8;
+button:hover{
+
+opacity:0.8;
+
 }
 
-.orange {
-  background: #f08c00;
-}
+.predictor{
 
-.green {
-  background: #2f9e44;
-}
+width:680px;
+margin:30px auto;
 
-.red {
-  background: #c92a2a;
-}
-
-/* West Ham highlight */
-.westham {
-  box-shadow: inset 4px 0 0 #00bfff;
-  font-weight: bold;
 }
