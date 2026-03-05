@@ -4,7 +4,7 @@ const template = document.querySelector("#fixtureTemplate");
 const refreshBtn = document.querySelector("#refreshBtn");
 const tableContainer = document.querySelector("#tableContainer");
 
-const API_KEY = "YOUR_NEW_API_KEY_HERE"; // Replace this
+const API_KEY = "4d462e0edd4a473b8012c9b246108674"; // Replace this
 const TEAM_ID = 563; // West Ham United
 
 /* ===============================
